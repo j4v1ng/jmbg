@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JMBG Validator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JMBG Validator</h1>
+        <input type="text" id="jmbgInput" placeholder="Enter JMBG" maxlength="13">
+        <button onclick="validateJMBG()">Validate</button>
+        <div id="result" class="result"></div>
+        <div id="details" class="result"></div>
+    </div>
+
+    <script>
+        function validateJMBG() {
+            const jmbg = document.getElementById('jmbgInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const detailsDiv = document.getElementById('details');
+
+            if (isValidJMBG(jmbg)) {
+                resultDiv.textContent = 'Valid JMBG';
+                resultDiv.className = 'result valid';
+                detailsDiv.innerHTML = getJMBGDetails(jmbg);
+            } else {
+                resultDiv.textContent = 'Invalid JMBG';
+                resultDiv.className = 'result invalid';
+                detailsDiv.innerHTML = '';
+            }
+        }
+
+        function isValidJMBG(jmbg) {
+            if (!/^\d{13}$/.test(jmbg)) {
+                return false;
+            }
+
+            const digits = jmbg.split('').map(Number);
+
+            const day = parseInt(jmbg.substring(0, 2), 10);
+            const month = parseInt(jmbg.substring(2, 4), 10);
+            const year = parseInt(jmbg.substring(4, 7), 10) + 1000;
+
+            if (!isValidDate(day, month, year)) {
+                return false;
+            }
+
+            const checksum = calculateChecksum(digits);
+            return checksum === digits[12];
+        }
+
+        function isValidDate(day, month, year) {
+            const date = new Date(year, month - 1, day);
+            return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+        }
+
+        function calculateChecksum(digits) {
+            const coefficients = [7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
+            let sum = 0;
+
+            for (let i = 0; i < 12; i++) {
+                sum += digits[i] * coefficients[i];
+            }
+
+            const remainder = sum % 11;
+            if (remainder === 0) {
+                return 0;
+            } else if (remainder === 1) {
+                return 1;
+            } else {
+                return 11 - remainder;
+            }
+        }
+
+        function getJMBGDetails(jmbg) {
+            const day = jmbg.substring(0, 2);
+            const month = jmbg.substring(2, 4);
+            const year = parseInt(jmbg.substring(4, 7), 10) + 1000;
+
+            const regionCode = jmbg.substring(7, 9);
+            const serialNumber = jmbg.substring(9, 12);
+
+            const gender = parseInt(serialNumber, 10) < 500 ? 'Male' : 'Female';
+
+            const regions = {
+                '00': 'Foreigners without citizenship',
+                '01': 'Foreigners in Bosnia and Herzegovina',
+                '02': 'Foreigners in Montenegro',
+                '03': 'Foreigners in Croatia',
+                '04': 'Foreigners in Macedonia',
+                '05': 'Foreigners in Slovenia',
+                '07': 'Foreigners in Serbia',
+                '08': 'Foreigners in Vojvodina',
+                '09': 'Foreigners in Kosovo and Metohija',
+                '10': 'Banja Luka',
+                '11': 'Bihać',
+                '12': 'Doboj',
+                '13': 'Goražde',
+                '14': 'Livno',
+                '15': 'Mostar',
+                '16': 'Prijedor',
+                '17': 'Sarajevo',
+                '18': 'Tuzla',
+                '19': 'Zenica',
+                '20': 'Montenegro',
+                '21': 'Podgorica',
+                '22': 'Montenegro',
+                '23': 'Montenegro',
+                '24': 'Montenegro',
+                '25': 'Montenegro',
+                '26': 'Nikšić',
+                '27': 'Montenegro',
+                '28': 'Montenegro',
+                '29': 'Pljevlja',
+                '30': 'Osijek, Slavonia region',
+                '31': 'Bjelovar, Virovitica, Koprivnica, Pakrac, Podravina region',
+                '32': 'Varaždin, Međimurje region',
+                '33': 'Zagreb',
+                '34': 'Karlovac',
+                '35': 'Gospić, Lika region',
+                '36': 'Rijeka, Pula, Istria and Primorje region',
+                '37': 'Sisak, Banovina region',
+                '38': 'Split, Zadar, Dubrovnik, Dalmatia region',
+                '39': 'Croatia (Other)',
+                '41': 'Bitola',
+                '42': 'Kumanovo',
+                '43': 'Ohrid',
+                '44': 'Prilep',
+                '45': 'Skopje',
+                '46': 'Strumica',
+                '47': 'Tetovo',
+                '48': 'Veles',
+                '49': 'Štip',
+                '50': 'Slovenia',
+                '51': 'Slovenia',
+                '52': 'Slovenia',
+                '53': 'Slovenia',
+                '54': 'Slovenia',
+                '55': 'Slovenia',
+                '56': 'Slovenia',
+                '57': 'Slovenia',
+                '58': 'Slovenia',
+                '59': 'Slovenia',
+                '70': 'Central Serbia',
+                '71': 'Belgrade region',
+                '72': 'Šumadija',
+                '73': 'Niš',
+                '74': 'Southern Morava',
+                '75': 'Zaječar',
+                '76': 'Podunavlje',
+                '77': 'Podrinje and Kolubara',
+                '78': 'Kraljevo',
+                '79': 'Užice',
+                '80': 'Novi Sad',
+                '81': 'Sombor',
+                '82': 'Subotica',
+                '83': 'Zrenjanin',
+                '84': 'Pančevo',
+                '85': 'Kikinda',
+                '86': 'Ruma',
+                '87': 'Sremska Mitrovica',
+                '88': 'Kosovo and Metohija',
+                '89': 'Kosovo and Metohija',
+                '91': 'Priština',
+                '92': 'Kosovska Mitrovica',
+                '93': 'Peć',
+                '94': 'Đakovica',
+                '95': 'Prizren',
+                '96': 'Kosovsko Pomoravski okrug',
+            };
+
+            const region = regions[regionCode] || 'Unknown Region';
+
+            return `
+                <p><strong>Date of Birth:</strong> ${day}-${month}-${year}</p>
+                <p><strong>Gender:</strong> ${gender}</p>
+                <p><strong>Region:</strong> ${region} (${regionCode})</p>
+            `;
+        }
+    </script>
+</body>
+</html>
